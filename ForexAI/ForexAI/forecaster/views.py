@@ -143,7 +143,6 @@ def hit_api():
 
     data = json.loads(data.text)
     curr = list(data['rates'][str(start)].keys())
-    curr.append(base)
     return dict(enumerate(curr))
 
 
