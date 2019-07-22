@@ -136,6 +136,15 @@ def hit_api():
         tdel = datetime.timedelta(days=2)
         start -= tdel
         end = start + tdelta
+        
+    elif start.weekday() == 0:
+        tdel = datetime.timedelta(days=3)
+        start -= tdel
+        end = start + tdelta
+    else:
+        tdel = datetime.timedelta(days=1)
+        start -= tdel
+        end = start + tdelta
     base = 'USD'
 
     data = requests.get(f"https://api.exchangeratesapi.io/history?start_at={start}&"
