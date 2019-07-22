@@ -21,7 +21,6 @@ class UserForm(forms.Form):
 
         data = json.loads(data.text)
         curr = list(data['rates'][str(start)].keys())
-        curr.append(base)
         return curr
 
     CHOICES = list(enumerate(hitAPI()))
