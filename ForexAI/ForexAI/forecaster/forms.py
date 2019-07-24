@@ -1,6 +1,7 @@
 from django import forms
 import datetime
-import json, requests
+import json
+import requests
 
 
 class UserForm(forms.Form):
@@ -12,6 +13,14 @@ class UserForm(forms.Form):
 
         if start.weekday() == 5 or start.weekday() == 6:
             tdel = datetime.timedelta(days=2)
+            start -= tdel
+            end = start + tdelta
+        elif start.weekday() == 0:
+            tdel = datetime.timedelta(days=3)
+            start -= tdel
+            end = start + tdelta
+        else:
+            tdel = datetime.timedelta(days=1)
             start -= tdel
             end = start + tdelta
         base = 'USD'
@@ -45,5 +54,5 @@ class UserForm(forms.Form):
             raise forms.ValidationError("Base and Target currencies can't be the same")
         if time < 1 or time > 6:
             raise forms.ValidationError("Max Waiting time takes values between 1 and 6 only")
-        
+
         return cleaned_data
