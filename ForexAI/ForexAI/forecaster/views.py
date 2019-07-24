@@ -15,15 +15,18 @@ from statsmodels.tsa.arima_model import ARIMA as ai
 def home(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
+
         if form.is_valid():
+
             post = dict()
             post['base_Currency'] = form.cleaned_data['base_Currency']
             post['target_Currency'] = form.cleaned_data['target_Currency']
             post['amount'] = form.cleaned_data['amount']
             post['startDate'] = form.cleaned_data['startDate']
             post['max_waiting_time'] = form.cleaned_data['max_waiting_time']
-     
             result_json = predictor(post)
+            print(result_json)
+
             return render(request, 'currency/result.html', {'result': json.loads(result_json)})
     else:
         form = UserForm()
@@ -65,7 +68,8 @@ def predictor(post):
         last_value = df.iloc[-1, :-1].values[1]
 
         cache.set('data', df, 60)
-        
+
+        return train_model(df['rates'].values, max_waiting_time, last_value, amount)
 
 
     else:
@@ -86,15 +90,14 @@ def predictor(post):
             df = pd.concat(frames)
             
             cache.set('data', df, 60)
-            
+
+            return train_model(df['rates'].values, max_waiting_time, last_value, amount)
 
         else:
             data_cache = cache.get('data')
             df = pd.DataFrame(data_cache)
             last_value = df.iloc[-1, :-1].values[1]
-            
-        
-    return train_model(df['rates'].values, max_waiting_time, last_value, amount)
+            return train_model(df['rates'].values, max_waiting_time, last_value, amount)
 
 
 
@@ -114,7 +117,6 @@ def hit_api():
         tdel = datetime.timedelta(days=2)
         start -= tdel
         end = start + tdelta
-        
     elif start.weekday() == 0:
         tdel = datetime.timedelta(days=3)
         start -= tdel
@@ -145,7 +147,6 @@ def findFriday():
 
 def updateResult(index, result, days, time, last_value, amount):
 
-    print(result)
     if index == len(result)+1:
         result.insert(0, last_value)
         result.insert(1, last_value)
@@ -160,11 +161,14 @@ def updateResult(index, result, days, time, last_value, amount):
 
     resultdict = list()
     for i in range(time):
+        print(str(days[i]))
+        print(result[i])
         temp = dict()
         temp['date'] = str(days[i])
         temp['predicted_value'] = str(result[i])
         temp['amount'] = amount
         temp['final_amount'] = result[i] * amount
+
         resultdict.append(temp)
 
 
@@ -182,7 +186,8 @@ def magic(start, end, sym, base):
 
     return df
 
-def train_model(actualdata, max_waiting_time, last_value, amount):
+
+def train_model(actualdata, max_waiting_time, last_value,amount):
     model_fit = start_arima_forecasting(actualdata, 3, 1, 0)
     predicted_result = model_fit.forecast(5)[0]
     predicted_result = np.array(predicted_result).tolist()
@@ -191,6 +196,5 @@ def train_model(actualdata, max_waiting_time, last_value, amount):
 
     resultDict = updateResult(friday, predicted_result, days, max_waiting_time, last_value, amount)
     result_json = json.dumps(resultDict)
-    
-    
+
     return result_json
