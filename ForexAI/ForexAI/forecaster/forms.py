@@ -10,7 +10,7 @@ class UserForm(forms.Form):
         tdelta = datetime.timedelta(days=1)
         end = start + tdelta
 
-        if start.weekday() == 5 or start.weekday() == 6:
+        if start.weekday() in [5, 6]:
             tdel = datetime.timedelta(days=2)
             start -= tdel
             end = start + tdelta
