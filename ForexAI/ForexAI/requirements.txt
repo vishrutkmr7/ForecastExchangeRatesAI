@@ -60,7 +60,7 @@ patsy==0.5.1
 
 pbr==5.4.1
 
-protobuf==3.9.0
+protobuf==3.18.3
 
 PyAudio==0.2.11
 
